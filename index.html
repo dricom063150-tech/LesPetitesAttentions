@@ -17,6 +17,7 @@
         --accent-dark: #d45e44;
         --background: #fff9f5;
         --text: #2d1f1f;
+        --card: #ffffff;
       }
 
       * {
@@ -45,6 +46,7 @@
 
       header p {
         margin: 0 auto;
+        max-width: 640px;
         max-width: 600px;
         font-size: 1.1rem;
         line-height: 1.6;
@@ -60,9 +62,8 @@
         align-items: start;
       }
 
-      .video-card,
-      .form-card {
-        background: white;
+      .card {
+        background: var(--card);
         border-radius: 20px;
         box-shadow: 0 20px 50px rgba(244, 118, 91, 0.15);
         padding: 1.75rem;
@@ -77,6 +78,9 @@
         box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
       }
 
+      .video-wrapper iframe {
+        position: absolute;
+        inset: 0;
       .video-wrapper iframe,
       .video-wrapper video {
         position: absolute;
@@ -87,6 +91,7 @@
         border: 0;
       }
 
+      .card h2 {
       .form-card h2,
       .video-card h2 {
         font-family: "Playfair Display", Georgia, serif;
@@ -156,11 +161,73 @@
         transform: translateY(0);
       }
 
+      button[disabled] {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .status-message {
+        min-height: 1.5rem;
+        font-size: 0.95rem;
+      }
+
+      .status-message.success {
+        color: #1a7f60;
+      }
+
+      .status-message.error {
+        color: #c62828;
+      }
+
+      .stats-total {
+        font-size: 1.1rem;
+        margin-bottom: 1.25rem;
+      }
+
+      .stats-total strong {
+        font-size: 1.5rem;
+        color: var(--accent-dark);
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1.5rem;
+      }
+
+      .stat-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+      }
+
+      .stat-list li {
+        background: rgba(247, 132, 107, 0.1);
+        border-radius: 12px;
+        padding: 0.6rem 0.75rem;
+        font-weight: 600;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .stat-empty {
+        background: none;
+        padding: 0;
+        color: rgba(45, 31, 31, 0.7);
+        font-weight: 400;
+      }
+
       @media (max-width: 600px) {
         header {
           padding: 2.5rem 1rem 1.5rem;
         }
 
+        .card {
         .video-card,
         .form-card {
           padding: 1.5rem;
@@ -179,6 +246,7 @@
     </header>
 
     <main>
+      <section class="card" aria-labelledby="video-title">
       <section class="video-card" aria-labelledby="video-title">
         <h2 id="video-title">Vidéo d'inspiration</h2>
         <div class="video-wrapper">
@@ -191,6 +259,157 @@
         </div>
       </section>
 
+      <section class="card" aria-labelledby="form-title">
+        <h2 id="form-title">Exprimez votre ressenti</h2>
+        <form id="testimonial-form">
+          <label for="age-range">Tranche d'âge</label>
+          <select id="age-range" name="ageRange" required>
+            <option value="">Sélectionnez votre tranche</option>
+            <option value="18-25">18 - 25 ans</option>
+            <option value="26-35">26 - 35 ans</option>
+            <option value="36-45">36 - 45 ans</option>
+            <option value="46-60">46 - 60 ans</option>
+            <option value="60+">60 ans et plus</option>
+          </select>
+
+          <label for="profession">Profession</label>
+          <input
+            id="profession"
+            type="text"
+            name="profession"
+            placeholder="Ex. : Enseignant·e, entrepreneur·e..."
+            required
+          />
+
+          <label for="family-status">Situation de famille</label>
+          <select id="family-status" name="familySituation" required>
+            <option value="">Sélectionnez votre situation</option>
+            <option value="celibataire">Célibataire</option>
+            <option value="couple">En couple</option>
+            <option value="marie">Marié·e</option>
+            <option value="famille">Famille avec enfants</option>
+            <option value="autre">Autre</option>
+          </select>
+
+          <label for="feeling">Ressenti lors de la lecture de la carte</label>
+          <textarea
+            id="feeling"
+            name="feeling"
+            placeholder="Décrivez les émotions ou pensées suscitées par notre carte..."
+            required
+          ></textarea>
+
+          <button type="submit">Envoyer mon témoignage</button>
+          <p id="form-status" class="status-message" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+
+      <section class="card" aria-labelledby="stats-title">
+        <h2 id="stats-title">Vos retours en chiffres</h2>
+        <p class="stats-total">
+          Total des témoignages : <strong id="total-submissions">0</strong>
+        </p>
+        <div class="stats-grid">
+          <div>
+            <h3>Par tranche d'âge</h3>
+            <ul id="age-stats" class="stat-list"></ul>
+          </div>
+          <div>
+            <h3>Par situation familiale</h3>
+            <ul id="family-stats" class="stat-list"></ul>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const form = document.getElementById('testimonial-form');
+      const statusMessage = document.getElementById('form-status');
+      const submitButton = form.querySelector('button[type="submit"]');
+      const totalCounter = document.getElementById('total-submissions');
+      const ageStatsList = document.getElementById('age-stats');
+      const familyStatsList = document.getElementById('family-stats');
+
+      async function fetchStats() {
+        try {
+          const response = await fetch('/api/stats');
+          if (!response.ok) {
+            throw new Error('Impossible de récupérer les statistiques.');
+          }
+          const data = await response.json();
+          totalCounter.textContent = data.totalSubmissions ?? 0;
+          renderStatList(ageStatsList, data.ageRanges);
+          renderStatList(familyStatsList, data.familySituations);
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      function renderStatList(element, stats) {
+        element.innerHTML = '';
+        const entries = Object.entries(stats || {});
+        if (!entries.length) {
+          const li = document.createElement('li');
+          li.textContent = 'Pas encore de données.';
+          li.classList.add('stat-empty');
+          element.appendChild(li);
+          return;
+        }
+
+        for (const [label, value] of entries) {
+          const li = document.createElement('li');
+          const spanLabel = document.createElement('span');
+          spanLabel.textContent = label;
+          const spanValue = document.createElement('span');
+          spanValue.textContent = value;
+          li.append(spanLabel, spanValue);
+          element.appendChild(li);
+        }
+      }
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        statusMessage.textContent = 'Envoi en cours...';
+        statusMessage.className = 'status-message';
+        submitButton.disabled = true;
+
+        const payload = {
+          ageRange: form.ageRange.value,
+          profession: form.profession.value.trim(),
+          familySituation: form.familySituation.value,
+          feeling: form.feeling.value.trim(),
+        };
+
+        try {
+          const response = await fetch('/api/testimonials', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            const message = Array.isArray(data.errors)
+              ? data.errors.join(' ')
+              : data.message || 'Une erreur est survenue.';
+            throw new Error(message);
+          }
+
+          statusMessage.textContent = data.message || 'Merci pour votre partage !';
+          statusMessage.classList.add('success');
+          form.reset();
+          fetchStats();
+        } catch (error) {
+          statusMessage.textContent = error.message;
+          statusMessage.classList.add('error');
+        } finally {
+          submitButton.disabled = false;
+        }
+      });
+
+      fetchStats();
+    </script>
       <section class="form-card" aria-labelledby="form-title">
         <h2 id="form-title">Exprimez votre ressenti</h2>
         <form>
