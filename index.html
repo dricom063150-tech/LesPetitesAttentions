@@ -47,6 +47,7 @@
       header p {
         margin: 0 auto;
         max-width: 640px;
+        max-width: 600px;
         font-size: 1.1rem;
         line-height: 1.6;
       }
@@ -80,12 +81,19 @@
       .video-wrapper iframe {
         position: absolute;
         inset: 0;
+      .video-wrapper iframe,
+      .video-wrapper video {
+        position: absolute;
+        top: 0;
+        left: 0;
         width: 100%;
         height: 100%;
         border: 0;
       }
 
       .card h2 {
+      .form-card h2,
+      .video-card h2 {
         font-family: "Playfair Display", Georgia, serif;
         font-size: 1.6rem;
         margin-top: 0;
@@ -106,6 +114,7 @@
       }
 
       input[type="text"],
+      input[type="number"],
       select,
       textarea {
         border: 1px solid rgba(0, 0, 0, 0.15);
@@ -219,6 +228,8 @@
         }
 
         .card {
+        .video-card,
+        .form-card {
           padding: 1.5rem;
         }
       }
@@ -236,6 +247,7 @@
 
     <main>
       <section class="card" aria-labelledby="video-title">
+      <section class="video-card" aria-labelledby="video-title">
         <h2 id="video-title">Vidéo d'inspiration</h2>
         <div class="video-wrapper">
           <iframe
@@ -398,5 +410,55 @@
 
       fetchStats();
     </script>
+      <section class="form-card" aria-labelledby="form-title">
+        <h2 id="form-title">Exprimez votre ressenti</h2>
+        <form>
+          <label>
+            Tranche d'âge
+            <select name="age-range" required>
+              <option value="">Sélectionnez votre tranche</option>
+              <option value="18-25">18 - 25 ans</option>
+              <option value="26-35">26 - 35 ans</option>
+              <option value="36-45">36 - 45 ans</option>
+              <option value="46-60">46 - 60 ans</option>
+              <option value="60+">60 ans et plus</option>
+            </select>
+          </label>
+
+          <label>
+            Profession
+            <input
+              type="text"
+              name="profession"
+              placeholder="Ex. : Enseignant·e, entrepreneur·e..."
+              required
+            />
+          </label>
+
+          <label>
+            Situation de famille
+            <select name="family-status" required>
+              <option value="">Sélectionnez votre situation</option>
+              <option value="celibataire">Célibataire</option>
+              <option value="couple">En couple</option>
+              <option value="marie">Marié·e</option>
+              <option value="famille">Famille avec enfants</option>
+              <option value="autre">Autre</option>
+            </select>
+          </label>
+
+          <label>
+            Ressenti lors de la lecture de la carte
+            <textarea
+              name="ressenti"
+              placeholder="Décrivez les émotions ou pensées suscitées par notre carte..."
+              required
+            ></textarea>
+          </label>
+
+          <button type="submit">Envoyer mon témoignage</button>
+        </form>
+      </section>
+    </main>
   </body>
 </html>
