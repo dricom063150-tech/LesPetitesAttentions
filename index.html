@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Les Petites Attentions</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Source+Sans+3:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        color-scheme: light;
+        --accent: #f7846b;
+        --accent-dark: #d45e44;
+        --background: #fff9f5;
+        --text: #2d1f1f;
+        --card: #ffffff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Source Sans 3", system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+        background: var(--background);
+        color: var(--text);
+      }
+
+      header {
+        text-align: center;
+        padding: 3rem 1rem 2rem;
+      }
+
+      header h1 {
+        font-family: "Playfair Display", Georgia, "Times New Roman", serif;
+        font-size: clamp(2rem, 4vw, 3.5rem);
+        margin: 0 0 0.75rem;
+        color: var(--accent-dark);
+      }
+
+      header p {
+        margin: 0 auto;
+        max-width: 640px;
+        font-size: 1.1rem;
+        line-height: 1.6;
+      }
+
+      main {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 2.5rem;
+        padding: 0 1.5rem 4rem;
+        max-width: 1200px;
+        margin: 0 auto;
+        align-items: start;
+      }
+
+      .card {
+        background: var(--card);
+        border-radius: 20px;
+        box-shadow: 0 20px 50px rgba(244, 118, 91, 0.15);
+        padding: 1.75rem;
+      }
+
+      .video-wrapper {
+        position: relative;
+        padding-bottom: 56.25%;
+        height: 0;
+        overflow: hidden;
+        border-radius: 16px;
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+      }
+
+      .video-wrapper iframe {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        border: 0;
+      }
+
+      .card h2 {
+        font-family: "Playfair Display", Georgia, serif;
+        font-size: 1.6rem;
+        margin-top: 0;
+        margin-bottom: 1.25rem;
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+      }
+
+      label {
+        display: flex;
+        flex-direction: column;
+        font-weight: 600;
+        gap: 0.5rem;
+      }
+
+      input[type="text"],
+      select,
+      textarea {
+        border: 1px solid rgba(0, 0, 0, 0.15);
+        border-radius: 12px;
+        padding: 0.85rem 1rem;
+        font-size: 1rem;
+        font-family: inherit;
+        background: #fff9f5;
+        transition: border 0.2s ease;
+      }
+
+      textarea {
+        min-height: 120px;
+        resize: vertical;
+      }
+
+      input:focus,
+      select:focus,
+      textarea:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(247, 132, 107, 0.15);
+      }
+
+      button {
+        border: none;
+        border-radius: 999px;
+        padding: 0.9rem 1.75rem;
+        font-size: 1rem;
+        font-weight: 600;
+        font-family: inherit;
+        background: var(--accent);
+        color: #fff;
+        cursor: pointer;
+        transition: background 0.2s ease, transform 0.2s ease;
+      }
+
+      button:hover {
+        background: var(--accent-dark);
+        transform: translateY(-2px);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      button[disabled] {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .status-message {
+        min-height: 1.5rem;
+        font-size: 0.95rem;
+      }
+
+      .status-message.success {
+        color: #1a7f60;
+      }
+
+      .status-message.error {
+        color: #c62828;
+      }
+
+      .stats-total {
+        font-size: 1.1rem;
+        margin-bottom: 1.25rem;
+      }
+
+      .stats-total strong {
+        font-size: 1.5rem;
+        color: var(--accent-dark);
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1.5rem;
+      }
+
+      .stat-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+      }
+
+      .stat-list li {
+        background: rgba(247, 132, 107, 0.1);
+        border-radius: 12px;
+        padding: 0.6rem 0.75rem;
+        font-weight: 600;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .stat-empty {
+        background: none;
+        padding: 0;
+        color: rgba(45, 31, 31, 0.7);
+        font-weight: 400;
+      }
+
+      @media (max-width: 600px) {
+        header {
+          padding: 2.5rem 1rem 1.5rem;
+        }
+
+        .card {
+          padding: 1.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Les Petites Attentions</h1>
+      <p>
+        Donner un sourire, provoquer une émotion, offrir un moment suspendu. Notre
+        projet "Les Petites Attentions" capture l'essence des gestes simples qui
+        réchauffent le cœur.
+      </p>
+    </header>
+
+    <main>
+      <section class="card" aria-labelledby="video-title">
+        <h2 id="video-title">Vidéo d'inspiration</h2>
+        <div class="video-wrapper">
+          <iframe
+            src="https://www.youtube.com/embed/kjKq6b6zQ9s"
+            title="Présentation des petites attentions"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+          ></iframe>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="form-title">
+        <h2 id="form-title">Exprimez votre ressenti</h2>
+        <form id="testimonial-form">
+          <label for="age-range">Tranche d'âge</label>
+          <select id="age-range" name="ageRange" required>
+            <option value="">Sélectionnez votre tranche</option>
+            <option value="18-25">18 - 25 ans</option>
+            <option value="26-35">26 - 35 ans</option>
+            <option value="36-45">36 - 45 ans</option>
+            <option value="46-60">46 - 60 ans</option>
+            <option value="60+">60 ans et plus</option>
+          </select>
+
+          <label for="profession">Profession</label>
+          <input
+            id="profession"
+            type="text"
+            name="profession"
+            placeholder="Ex. : Enseignant·e, entrepreneur·e..."
+            required
+          />
+
+          <label for="family-status">Situation de famille</label>
+          <select id="family-status" name="familySituation" required>
+            <option value="">Sélectionnez votre situation</option>
+            <option value="celibataire">Célibataire</option>
+            <option value="couple">En couple</option>
+            <option value="marie">Marié·e</option>
+            <option value="famille">Famille avec enfants</option>
+            <option value="autre">Autre</option>
+          </select>
+
+          <label for="feeling">Ressenti lors de la lecture de la carte</label>
+          <textarea
+            id="feeling"
+            name="feeling"
+            placeholder="Décrivez les émotions ou pensées suscitées par notre carte..."
+            required
+          ></textarea>
+
+          <button type="submit">Envoyer mon témoignage</button>
+          <p id="form-status" class="status-message" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+
+      <section class="card" aria-labelledby="stats-title">
+        <h2 id="stats-title">Vos retours en chiffres</h2>
+        <p class="stats-total">
+          Total des témoignages : <strong id="total-submissions">0</strong>
+        </p>
+        <div class="stats-grid">
+          <div>
+            <h3>Par tranche d'âge</h3>
+            <ul id="age-stats" class="stat-list"></ul>
+          </div>
+          <div>
+            <h3>Par situation familiale</h3>
+            <ul id="family-stats" class="stat-list"></ul>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const form = document.getElementById('testimonial-form');
+      const statusMessage = document.getElementById('form-status');
+      const submitButton = form.querySelector('button[type="submit"]');
+      const totalCounter = document.getElementById('total-submissions');
+      const ageStatsList = document.getElementById('age-stats');
+      const familyStatsList = document.getElementById('family-stats');
+
+      async function fetchStats() {
+        try {
+          const response = await fetch('/api/stats');
+          if (!response.ok) {
+            throw new Error('Impossible de récupérer les statistiques.');
+          }
+          const data = await parseJsonResponse(response);
+          totalCounter.textContent = data.totalSubmissions ?? 0;
+          renderStatList(ageStatsList, data.ageRanges);
+          renderStatList(familyStatsList, data.familySituations);
+        } catch (error) {
+          console.error(error);
+          const fallback =
+            error?.message || 'Impossible de récupérer les statistiques.';
+          totalCounter.textContent = '—';
+          renderListMessage(ageStatsList, fallback);
+          renderListMessage(familyStatsList, fallback);
+        }
+      }
+
+      function renderListMessage(element, message) {
+        element.innerHTML = '';
+        const li = document.createElement('li');
+        li.textContent = message;
+        li.classList.add('stat-empty');
+        element.appendChild(li);
+      }
+
+      function renderStatList(element, stats) {
+        element.innerHTML = '';
+        const entries = Object.entries(stats || {});
+        if (!entries.length) {
+          renderListMessage(element, 'Pas encore de données.');
+          return;
+        }
+
+        for (const [label, value] of entries) {
+          const li = document.createElement('li');
+          const spanLabel = document.createElement('span');
+          spanLabel.textContent = label;
+          const spanValue = document.createElement('span');
+          spanValue.textContent = value;
+          li.append(spanLabel, spanValue);
+          element.appendChild(li);
+        }
+      }
+
+      async function parseJsonResponse(response) {
+        try {
+          return await response.clone().json();
+        } catch (_) {
+          const text = (await response.text())?.trim();
+          const fallbackMessage =
+            text?.slice(0, 120) || 'Réponse inattendue du serveur (format non JSON).';
+          throw new Error(fallbackMessage);
+        }
+      }
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        statusMessage.textContent = 'Envoi en cours...';
+        statusMessage.className = 'status-message';
+        submitButton.disabled = true;
+
+        const payload = {
+          ageRange: form.ageRange.value,
+          profession: form.profession.value.trim(),
+          familySituation: form.familySituation.value,
+          feeling: form.feeling.value.trim(),
+        };
+
+        try {
+          const response = await fetch('/api/testimonials', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+
+          const data = await parseJsonResponse(response);
+
+          if (!response.ok) {
+            const message = Array.isArray(data.errors)
+              ? data.errors.join(' ')
+              : data.message || 'Une erreur est survenue.';
+            throw new Error(message);
+          }
+
+          statusMessage.textContent = data.message || 'Merci pour votre partage !';
+          statusMessage.classList.add('success');
+          form.reset();
+          fetchStats();
+        } catch (error) {
+          statusMessage.textContent = error.message;
+          statusMessage.classList.add('error');
+        } finally {
+          submitButton.disabled = false;
+        }
+      });
+
+      fetchStats();
+    </script>
+  </body>
+</html>
