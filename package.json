@@ -1,0 +1,12 @@
+{
+  "name": "les-petites-attentions",
+  "version": "1.0.0",
+  "description": "Landing page et API pour collecter les témoignages des petites attentions.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": ["petites", "attentions", "temoignages"],
+  "author": "",
+  "license": "MIT"
+}
