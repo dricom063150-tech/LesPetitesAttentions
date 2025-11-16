@@ -9,7 +9,6 @@ const PORT = process.env.PORT || 3000;
 const DATA_DIR = path.join(__dirname, 'data');
 const DATA_FILE = path.join(DATA_DIR, 'submissions.json');
 const INDEX_FILE = path.join(__dirname, 'index.html');
-const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || '*';
 
 async function ensureStorage() {
   await fsp.mkdir(DATA_DIR, { recursive: true });
@@ -31,16 +30,7 @@ async function readSubmissions() {
 }
 
 async function writeSubmissions(entries) {
-  await ensureStorage();
   await fsp.writeFile(DATA_FILE, JSON.stringify(entries, null, 2), 'utf8');
-}
-
-function getCorsHeaders() {
-  return {
-    'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
-    'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
-  };
 }
 
 function aggregateStats(entries) {
@@ -68,7 +58,6 @@ function sendJson(res, statusCode, payload) {
   res.writeHead(statusCode, {
     'Content-Type': 'application/json; charset=utf-8',
     'Cache-Control': 'no-store',
-    ...getCorsHeaders(),
   });
   res.end(JSON.stringify(payload));
 }
@@ -82,10 +71,7 @@ function sendHtml(res, stream) {
 }
 
 function sendNotFound(res) {
-  res.writeHead(404, {
-    'Content-Type': 'application/json; charset=utf-8',
-    ...getCorsHeaders(),
-  });
+  res.writeHead(404, { 'Content-Type': 'application/json; charset=utf-8' });
   res.end(JSON.stringify({ message: 'Ressource introuvable.' }));
 }
 
@@ -211,11 +197,6 @@ function serveStaticFile(res, filePath) {
 const server = http.createServer(async (req, res) => {
   const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
   const { pathname } = parsedUrl;
-
-  if (req.method === 'OPTIONS' && pathname.startsWith('/api/')) {
-    res.writeHead(204, getCorsHeaders());
-    return res.end();
-  }
 
   if (req.method === 'GET' && (pathname === '/' || pathname === '/index.html')) {
     const stream = fs.createReadStream(INDEX_FILE);

@@ -219,6 +219,8 @@
         }
 
         .card {
+        .video-card,
+        .form-card {
           padding: 1.5rem;
         }
       }
@@ -236,6 +238,7 @@
 
     <main>
       <section class="card" aria-labelledby="video-title">
+      <section class="video-card" aria-labelledby="video-title">
         <h2 id="video-title">Vidéo d'inspiration</h2>
         <div class="video-wrapper">
           <iframe
@@ -311,27 +314,9 @@
     </main>
 
     <script>
-      function ensureSingleFormInstance() {
-        const forms = document.querySelectorAll('#testimonial-form');
-        if (forms.length > 1) {
-          forms.forEach((formElement, index) => {
-            if (index > 0) {
-              formElement.remove();
-            }
-          });
-        }
-        return document.getElementById('testimonial-form');
-      }
-
-      const form = ensureSingleFormInstance();
-      if (!form) {
-        console.error(
-          'Formulaire introuvable. Vérifiez que le code HTML contient un formulaire avec l’ID "testimonial-form".'
-        );
-      }
-
+      const form = document.getElementById('testimonial-form');
       const statusMessage = document.getElementById('form-status');
-      const submitButton = form?.querySelector('button[type="submit"]');
+      const submitButton = form.querySelector('button[type="submit"]');
       const totalCounter = document.getElementById('total-submissions');
       const ageStatsList = document.getElementById('age-stats');
       const familyStatsList = document.getElementById('family-stats');
@@ -342,33 +327,23 @@
           if (!response.ok) {
             throw new Error('Impossible de récupérer les statistiques.');
           }
-          const data = await parseJsonResponse(response);
+          const data = await response.json();
           totalCounter.textContent = data.totalSubmissions ?? 0;
           renderStatList(ageStatsList, data.ageRanges);
           renderStatList(familyStatsList, data.familySituations);
         } catch (error) {
           console.error(error);
-          const fallback =
-            error?.message || 'Impossible de récupérer les statistiques.';
-          totalCounter.textContent = '—';
-          renderListMessage(ageStatsList, fallback);
-          renderListMessage(familyStatsList, fallback);
         }
-      }
-
-      function renderListMessage(element, message) {
-        element.innerHTML = '';
-        const li = document.createElement('li');
-        li.textContent = message;
-        li.classList.add('stat-empty');
-        element.appendChild(li);
       }
 
       function renderStatList(element, stats) {
         element.innerHTML = '';
         const entries = Object.entries(stats || {});
         if (!entries.length) {
-          renderListMessage(element, 'Pas encore de données.');
+          const li = document.createElement('li');
+          li.textContent = 'Pas encore de données.';
+          li.classList.add('stat-empty');
+          element.appendChild(li);
           return;
         }
 
@@ -383,65 +358,98 @@
         }
       }
 
-      async function parseJsonResponse(response) {
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        statusMessage.textContent = 'Envoi en cours...';
+        statusMessage.className = 'status-message';
+        submitButton.disabled = true;
+
+        const payload = {
+          ageRange: form.ageRange.value,
+          profession: form.profession.value.trim(),
+          familySituation: form.familySituation.value,
+          feeling: form.feeling.value.trim(),
+        };
+
         try {
-          return await response.clone().json();
-        } catch (_) {
-          const text = (await response.text())?.trim();
-          const fallbackMessage =
-            text?.slice(0, 120) || 'Réponse inattendue du serveur (format non JSON).';
-          throw new Error(fallbackMessage);
+          const response = await fetch('/api/testimonials', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            const message = Array.isArray(data.errors)
+              ? data.errors.join(' ')
+              : data.message || 'Une erreur est survenue.';
+            throw new Error(message);
+          }
+
+          statusMessage.textContent = data.message || 'Merci pour votre partage !';
+          statusMessage.classList.add('success');
+          form.reset();
+          fetchStats();
+        } catch (error) {
+          statusMessage.textContent = error.message;
+          statusMessage.classList.add('error');
+        } finally {
+          submitButton.disabled = false;
         }
-      }
-
-      if (form) {
-        form.addEventListener('submit', async (event) => {
-          event.preventDefault();
-          statusMessage.textContent = 'Envoi en cours...';
-          statusMessage.className = 'status-message';
-          if (submitButton) {
-            submitButton.disabled = true;
-          }
-
-          const payload = {
-            ageRange: form.ageRange.value,
-            profession: form.profession.value.trim(),
-            familySituation: form.familySituation.value,
-            feeling: form.feeling.value.trim(),
-          };
-
-          try {
-            const response = await fetch('/api/testimonials', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(payload),
-            });
-
-            const data = await parseJsonResponse(response);
-
-            if (!response.ok) {
-              const message = Array.isArray(data.errors)
-                ? data.errors.join(' ')
-                : data.message || 'Une erreur est survenue.';
-              throw new Error(message);
-            }
-
-            statusMessage.textContent = data.message || 'Merci pour votre partage !';
-            statusMessage.classList.add('success');
-            form.reset();
-            fetchStats();
-          } catch (error) {
-            statusMessage.textContent = error.message;
-            statusMessage.classList.add('error');
-          } finally {
-            if (submitButton) {
-              submitButton.disabled = false;
-            }
-          }
-        });
-      }
+      });
 
       fetchStats();
     </script>
+      <section class="form-card" aria-labelledby="form-title">
+        <h2 id="form-title">Exprimez votre ressenti</h2>
+        <form>
+          <label>
+            Tranche d'âge
+            <select name="age-range" required>
+              <option value="">Sélectionnez votre tranche</option>
+              <option value="18-25">18 - 25 ans</option>
+              <option value="26-35">26 - 35 ans</option>
+              <option value="36-45">36 - 45 ans</option>
+              <option value="46-60">46 - 60 ans</option>
+              <option value="60+">60 ans et plus</option>
+            </select>
+          </label>
+
+          <label>
+            Profession
+            <input
+              type="text"
+              name="profession"
+              placeholder="Ex. : Enseignant·e, entrepreneur·e..."
+              required
+            />
+          </label>
+
+          <label>
+            Situation de famille
+            <select name="family-status" required>
+              <option value="">Sélectionnez votre situation</option>
+              <option value="celibataire">Célibataire</option>
+              <option value="couple">En couple</option>
+              <option value="marie">Marié·e</option>
+              <option value="famille">Famille avec enfants</option>
+              <option value="autre">Autre</option>
+            </select>
+          </label>
+
+          <label>
+            Ressenti lors de la lecture de la carte
+            <textarea
+              name="ressenti"
+              placeholder="Décrivez les émotions ou pensées suscitées par notre carte..."
+              required
+            ></textarea>
+          </label>
+
+          <button type="submit">Envoyer mon témoignage</button>
+        </form>
+      </section>
+    </main>
   </body>
 </html>
